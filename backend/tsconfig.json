@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2020",
+    "sourceMap": true,
+    "outDir": "dist",  // Simplified relative path
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@/*": ["src/*"],
+      "@/entities/*": ["src/entities/*"],
+      "@/dto/*": ["src/dto/*"],
+      "@/services/*": ["src/services/*"],
+      "@/controllers/*": ["src/controllers/*"],
+      "@/modules/*": ["src/modules/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/middleware/*": ["src/middleware/*"],
+      "@/database/*": ["src/database/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
