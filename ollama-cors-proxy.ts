@@ -7,9 +7,9 @@ import type { Request, Response } from 'express';
 const app = express();
 const PORT = 8080;
 
-// Enable CORS for all origins (including Vercel)
+// Enable CORS for all origins (including hosted frontends)
 app.use(cors({
-  origin: ['https://upwork-llmproject.vercel.app', 'http://localhost:3000', 'https://localhost:3000'],
+  origin: (origin, callback) => callback(null, origin || '*'),
   credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
@@ -63,7 +63,7 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`🚀 Ollama CORS Proxy running on http://localhost:${PORT}`);
   console.log(`📡 Proxying requests to http://localhost:11434`);
-  console.log(`🌐 Allowing requests from https://upwork-llmproject.vercel.app`);
+  console.log(`🌐 Allowing requests from any origin`);
   console.log(`\n💡 To use this proxy, update your Ollama configuration base URL to:`);
   console.log(`   http://localhost:${PORT}`);
   console.log(`\n🔧 Make sure Ollama is running on localhost:11434`);

@@ -198,7 +198,8 @@ LOG_LEVEL=info
 
 #### Frontend (.env.local)
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+# No trailing /api — the app appends /api automatically
+NEXT_PUBLIC_API_BASE=http://localhost:3001
 ```
 
 ### AI Provider Configuration
@@ -363,7 +364,8 @@ OLLAMA_BASE_URL=https://yourname.pagekite.me
 
 2. **Deploy Frontend to Vercel**:
    - Connect GitHub repository to Vercel
-   - Set `NEXT_PUBLIC_API_URL=https://your-heroku-app.herokuapp.com/api`
+   - Set `NEXT_PUBLIC_API_BASE=https://your-backend.example.com`
+   - Optionally configure `frontend/public/config.json` with the same backend URL; the env var takes precedence
    - Deploy automatically on git push
 
 3. **Keep Ollama + PageKite Running**:
@@ -374,7 +376,7 @@ OLLAMA_BASE_URL=https://yourname.pagekite.me
 
 4. **Access Your App**:
    - **Production Frontend**: https://your-app.vercel.app
-   - **Production Backend**: https://your-heroku-app.herokuapp.com/api
+   - **Production Backend**: https://your-backend.example.com/api
    - **Local AI Tunnel**: https://yourname.pagekite.me
 
 ## 🎯 Key Features
@@ -452,7 +454,7 @@ git push heroku main
 #### Frontend on Vercel
 1. **Connect GitHub repository** to Vercel
 2. **Set environment variables**:
-   - `NEXT_PUBLIC_API_URL=https://your-heroku-app.herokuapp.com/api`
+   - `NEXT_PUBLIC_API_BASE=https://your-backend.example.com`
 3. **Deploy automatically** on git push
 
 ### Local Development with Tunneling
@@ -622,7 +624,7 @@ npm run test:watch
 4. Check port availability (default: 3001)
 
 #### Frontend Won't Connect
-1. Verify `NEXT_PUBLIC_API_URL` in `.env.local`
+1. Verify `NEXT_PUBLIC_API_BASE` in `.env.local`
 2. Ensure backend is running and accessible
 3. Check CORS configuration in backend
 

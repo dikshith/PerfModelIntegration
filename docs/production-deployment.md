@@ -18,7 +18,7 @@ This guide documents the production topology and the constraints we adhere to.
   - ALLOW_RAG_IN_PROD=true|false (default false)
   - Optional: CORS_ORIGIN / FRONTEND_URL for extra domains
 - Vercel:
-  - NEXT_PUBLIC_API_BASE=https://<heroku-app>.herokuapp.com (optional; frontend can also discover via public/config.json)
+  - NEXT_PUBLIC_API_BASE=https://<backend-domain> (no trailing /api). Optional if you serve frontend/public/config.json with backend.url set; the env var takes precedence.
 
 ## CORS and Base URL discovery
 - Backend CORS allows common localhosts and *.vercel.app. Add more via CORS_ORIGIN/FRONTEND_URL.

@@ -24,13 +24,19 @@ async function bootstrap() {
   // --- CORS (enable before other middlewares) ---
   const isProd = configService.get('NODE_ENV') === 'production';
   const explicitOrigins = [
-    'https://upwork-llmproject.vercel.app',
     'http://localhost:4200',
     'http://localhost:3000',
   ];
   const envOrigin = configService.get('CORS_ORIGIN');
+  const envOriginsCsv = configService.get('CORS_ORIGINS'); // comma-separated list
   const frontendUrl = configService.get('FRONTEND_URL');
   [envOrigin, frontendUrl].forEach((o) => { if (o) explicitOrigins.push(o); });
+  if (envOriginsCsv) {
+    envOriginsCsv.split(',')
+      .map((o: string) => o.trim())
+      .filter(Boolean)
+      .forEach((o: string) => explicitOrigins.push(o));
+  }
   const allowedHostRegex = [/\.vercel\.app$/i];
 
   app.enableCors({

@@ -6,7 +6,7 @@
 
 ## Frontend
 - cd frontend; npm install; npm run dev
-- Env: NEXT_PUBLIC_API_URL=http://localhost:3001/api
+- Env: NEXT_PUBLIC_API_BASE=http://localhost:3001
 
 ## RAG
 - Upload a PDF on the chat page; ask questions with RAG mode on.

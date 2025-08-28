@@ -317,8 +317,10 @@ class APIClient {
   private instance: AxiosInstance;
 
   constructor() {
+    const base = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/$/, '');
+    const baseURL = base ? `${base}/api` : '/api';
     this.instance = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      baseURL,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
@@ -1203,7 +1205,7 @@ const handleMessageClick = useCallback((messageId: string) => {
 - Validation and toasts guide users when models are missing/unavailable.
 
 ## 🚀 Deployment notes
-- NEXT_PUBLIC_API_URL must point to the backend base URL. In production (Vercel), set it to your Heroku API URL.
+- Set NEXT_PUBLIC_API_BASE to the backend origin (no trailing /api) or configure public/config.json. The env var takes precedence.
 - When using Ollama in production, ensure the backend is configured with OLLAMA_BASE_URL to a public tunnel; the frontend never connects to Ollama directly.
 
 This comprehensive frontend architecture provides a robust, scalable, and highly performant user interface that leverages modern React patterns and Next.js optimization features.

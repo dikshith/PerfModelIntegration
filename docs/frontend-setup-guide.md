@@ -3,11 +3,11 @@
 ## Quick start (local)
 1) cd frontend && npm install
 2) Configure env: create .env.local
-   - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+   - NEXT_PUBLIC_API_BASE=http://localhost:3001
 3) npm run dev
 
 ## Production (Vercel)
-- Set NEXT_PUBLIC_API_URL to your backend API base URL (e.g., https://your-heroku-app.herokuapp.com/api).
+- Set NEXT_PUBLIC_API_BASE to your backend base URL (e.g., https://your-backend.example.com). Do not include /api; the app will append it.
 - The frontend never talks to Ollama directly; all chat and RAG calls go to the backend.
 
 ## RAG UX

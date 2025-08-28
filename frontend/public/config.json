@@ -10,6 +10,6 @@
     "max_tokens": 2048
   },
   "backend": {
-    "url": "https://backend-llmupwork-9cb4e17b5107.herokuapp.com"
+  "url": "https://dixit-llmupwork.herokuapp.com"
   }
 }

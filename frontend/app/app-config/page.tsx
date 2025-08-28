@@ -200,7 +200,7 @@ export default function AppConfigPage() {
                 id="backend-url"
                 value={config?.backend?.url || ''}
                 onChange={(e) => handleInputChange('backend', 'url', e.target.value)}
-                placeholder="https://your-backend.herokuapp.com"
+                placeholder="https://your-backend.example.com"
                 className="font-mono"
               />
               <Button 
@@ -225,7 +225,7 @@ export default function AppConfigPage() {
           <div className="space-y-2">
             <h4 className="font-medium">1. Start PageKite Tunnel</h4>
             <p className="text-sm text-muted-foreground">
-              Run <code className="bg-gray-100 px-1 rounded">start-pagekite-py27.bat</code> and note the URL it provides.
+              Start your PageKite tunnel (via the menu or scripts in the repo) and note the URL it provides.
             </p>
           </div>
           

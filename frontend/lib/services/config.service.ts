@@ -50,6 +50,7 @@ class ConfigService {
     }
 
     // Fallback to defaults
+    const envBase = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '')
     this.config = {
       tunneling: {
         pagekite_url: 'https://your-tunnel.pagekite.me',
@@ -62,9 +63,9 @@ class ConfigService {
         max_tokens: 2048
       },
       backend: {
-        url: process.env.NODE_ENV === 'production' 
-          ? 'https://backend-llmupwork-9cb4e17b5107.herokuapp.com'
-          : 'http://localhost:3001'
+        url: envBase || (process.env.NODE_ENV === 'production' 
+          ? 'https://your-backend.example.com'
+          : 'http://localhost:3001')
       }
     };
 
@@ -90,7 +91,10 @@ class ConfigService {
   }
 
   getBackendUrl(): string {
-    return this.config?.backend.url || 'https://backend-llmupwork-9cb4e17b5107.herokuapp.com';
+  const cfgUrl = this.config?.backend.url
+  const envUrl = process.env.NEXT_PUBLIC_API_BASE
+  const url = (cfgUrl || envUrl || 'http://localhost:3001') as string
+  return url.replace(/\/+$/, '')
   }
 }
 

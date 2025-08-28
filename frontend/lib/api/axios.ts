@@ -1,9 +1,12 @@
 import axios from 'axios'
-import { API_BASE_URL } from '@/lib/constants/endpoints'
 import ConfigService from '@/lib/services/config.service'
 
+// Initial baseURL: prefer env override for SSR, falls back to localhost in dev
+const initialBase = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '')
+  || (process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : '')
+
 export const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: initialBase ? `${initialBase}/api` : undefined,
   // 0 disables timeout so long-running generations don't fail client-side
   timeout: 0,
   headers: {
@@ -34,7 +37,8 @@ axiosInstance.interceptors.request.use(async (config) => {
       // Hosted UI (e.g., Vercel): prefer public config.json backend.url if available
       const cfg = await ConfigService.getInstance().loadConfig()
       const backendBase = (cfg?.backend?.url || '').replace(/\/+$/, '')
-      const resolved = backendBase ? `${backendBase}/api` : (API_BASE_URL || '')
+      const envBase = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '')
+      const resolved = backendBase ? `${backendBase}/api` : (envBase ? `${envBase}/api` : '')
       if (resolved) {
         axiosInstance.defaults.baseURL = resolved
         config.baseURL = resolved
