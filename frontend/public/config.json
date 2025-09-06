@@ -1,8 +1,8 @@
 {
   "tunneling": {
-    "pagekite_url": "https://lucacirillo1234.pagekite.me",
+    "pagekite_url": "https://your-tunnel.pagekite.me",
     "enabled": true,
-    "description": "PageKite tunnel for Ollama remote access - ACTIVE"
+    "description": "PageKite tunnel for Ollama remote access"
   },
   "ollama": {
     "default_model": "llama3.1:8b",
@@ -10,6 +10,6 @@
     "max_tokens": 2048
   },
   "backend": {
-  "url": "https://dixit-llmupwork.herokuapp.com"
+  "url": "https://dixit-llmupwork-41ea59703428.herokuapp.com"
   }
 }

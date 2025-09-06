@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "frontend:clean-build",
+			"type": "shell",
+			"command": "npm ci ; if (Test-Path .next) { Remove-Item -Recurse -Force .next } ; npm run build",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

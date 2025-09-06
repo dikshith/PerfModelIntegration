@@ -30,7 +30,8 @@ async function bootstrap() {
   const envOrigin = configService.get('CORS_ORIGIN');
   const envOriginsCsv = configService.get('CORS_ORIGINS'); // comma-separated list
   const frontendUrl = configService.get('FRONTEND_URL');
-  [envOrigin, frontendUrl].forEach((o) => { if (o) explicitOrigins.push(o); });
+  [envOrigin, frontendUrl]
+    .forEach((o) => { if (o) explicitOrigins.push(o); });
   if (envOriginsCsv) {
     envOriginsCsv.split(',')
       .map((o: string) => o.trim())

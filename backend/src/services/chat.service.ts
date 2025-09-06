@@ -9,6 +9,7 @@ import { CreateChatMessageDto, ChatResponseDto } from '../dto/chat.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import pdfParse from 'pdf-parse';
+import { pdfBufferToMarkdown } from '../utils/pdf-markdown';
 import { ConfigService } from '@nestjs/config';
 
 // Simple knowledge base interface
@@ -34,7 +35,7 @@ export class ChatService {
     private readonly configService: ConfigService,
   ) {}
 
-  private sanitizeText(text: string): string {
+  private sanitizeText(text: string, preserveMarkdown = false): string {
     if (!text) return '';
     let t = text;
     // Normalize unicode (e.g., ligatures) and remove replacement chars
@@ -42,6 +43,12 @@ export class ChatService {
     t = t.replace(/\uFFFD+/g, ' '); // drop � characters
     // Remove control characters
     t = t.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]+/g, ' ');
+    if (preserveMarkdown) {
+      // Keep markdown symbols and indentation; trim trailing spaces and collapse 3+ blank lines
+      t = t.replace(/[ \t]+\n/g, '\n');
+      t = t.replace(/\n{3,}/g, '\n\n');
+      return t.trim();
+    }
     // Keep letters, numbers, punctuation and spaces; drop other odd glyphs
     t = t.replace(/[^\p{L}\p{N}\p{P}\p{Zs}]/gu, ' ');
     // Collapse whitespace
@@ -70,7 +77,8 @@ export class ChatService {
 
   // Knowledge base management methods
   addKnowledgeItem(item: KnowledgeItem): void {
-    const cleaned = this.sanitizeText(item.content || '');
+  const isMarkdown = (item.type || '').toLowerCase() === 'text/markdown' || /\.md$/i.test(item.name);
+  const cleaned = this.sanitizeText(item.content || '', isMarkdown);
     // Gate unreadable/scanned PDFs
     const readable = this.isReadableText(cleaned);
     const sanitized = { ...item, content: readable ? cleaned : '' };
@@ -114,7 +122,7 @@ export class ChatService {
 
     // Tighter chunking to keep prompts small and fast
     const toChunks = (text: string, chunkSize = 400, overlap = 60) => {
-      const clean = this.sanitizeText(text);
+      const clean = this.sanitizeText(text, true);
       const chunks: string[] = [];
       for (let i = 0; i < clean.length; i += (chunkSize - overlap)) {
         chunks.push(clean.slice(i, i + chunkSize));
@@ -158,7 +166,7 @@ export class ChatService {
     }
 
     // Keep prompt small: top 3 chunks, each <= 380 chars, overall cap ~2400 chars
-    const top = scored.slice(0, 3).map(s => ({ ...s, chunk: this.sanitizeText(s.chunk).slice(0, 380) }));
+  const top = scored.slice(0, 3).map(s => ({ ...s, chunk: this.sanitizeText(s.chunk, true).slice(0, 380) }));
     top.forEach(s => { if (!foundDocuments.includes(s.name)) foundDocuments.push(s.name); });
 
     const parts: string[] = [];
@@ -184,7 +192,7 @@ export class ChatService {
     const queryLower = (query || '').toLowerCase().trim();
 
     const toChunks = (text: string, chunkSize = 400, overlap = 60) => {
-      const clean = this.sanitizeText(text || '');
+      const clean = this.sanitizeText(text || '', true);
       const chunks: string[] = [];
       for (let i = 0; i < clean.length; i += (chunkSize - overlap)) {
         chunks.push(clean.slice(i, i + chunkSize));
@@ -220,7 +228,7 @@ export class ChatService {
     }
 
     scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, Math.max(1, topN)).map(s => ({ ...s, chunk: this.sanitizeText(s.chunk).slice(0, 380) }));
+  return scored.slice(0, Math.max(1, topN)).map(s => ({ ...s, chunk: this.sanitizeText(s.chunk, true).slice(0, 380) }));
   }
 
   // Helper: build an extractive answer when LLM is unavailable
@@ -242,7 +250,7 @@ export class ChatService {
         used.add(s.name);
         answer += `\n• ${s.name}:\n`;
       }
-      const cleaned = this.sanitizeText(s.chunk);
+  const cleaned = this.sanitizeText(s.chunk, true);
       const snippet = cleaned.length > 380 ? cleaned.slice(0, 380) + '…' : cleaned;
       answer += snippet + '\n';
     }
@@ -368,7 +376,7 @@ export class ChatService {
           const cap = 2000;
           let used = 0;
           for (const item of this.knowledgeBase) {
-            const clean = this.sanitizeText(item.content).slice(0, 380);
+            const clean = this.sanitizeText(item.content, true).slice(0, 380);
             const section = `\nDocument "${item.name}":\n${clean}`;
             if (used + section.length > cap) break;
             knowledgeContext += section;
@@ -572,20 +580,30 @@ export class ChatService {
           const ext = path.extname(fileName).toLowerCase();
           if (!['.txt', '.md', '.json', '.log', '.csv', '.pdf'].includes(ext)) continue;
           let content = '';
+          let type = `text/${ext.replace('.', '')}`;
           if (ext === '.pdf') {
-            const data = fs.readFileSync(filePath);
-            const parsed = await pdfParse(data);
-            content = parsed.text || '';
+            const base = path.join(uploadsDir, path.parse(fileName).name);
+            const mdPath = `${base}.md`;
+            if (fs.existsSync(mdPath)) {
+              content = fs.readFileSync(mdPath, 'utf-8');
+              type = 'text/markdown';
+            } else {
+              const data = fs.readFileSync(filePath);
+              content = await pdfBufferToMarkdown(data, fileName);
+              type = 'text/markdown';
+              try { fs.writeFileSync(mdPath, content, 'utf-8'); } catch {}
+            }
           } else {
             content = fs.readFileSync(filePath, 'utf-8');
+            if (ext === '.md') type = 'text/markdown';
           }
-          content = this.sanitizeText(content);
+          content = this.sanitizeText(content, true);
           const item: KnowledgeItem = {
             id: `kb-${fileName}`,
             name: fileName,
             content,
             size: stat.size,
-            type: `text/${ext.replace('.', '')}`,
+            type,
             uploadedAt: stat.mtime,
           };
           if (!this.knowledgeBase.some(k => k.name === item.name)) {

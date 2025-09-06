@@ -34,11 +34,11 @@ axiosInstance.interceptors.request.use(async (config) => {
         return config
       }
 
-      // Hosted UI (e.g., Vercel): prefer public config.json backend.url if available
-      const cfg = await ConfigService.getInstance().loadConfig()
-      const backendBase = (cfg?.backend?.url || '').replace(/\/+$/, '')
-      const envBase = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '')
-      const resolved = backendBase ? `${backendBase}/api` : (envBase ? `${envBase}/api` : '')
+  // Hosted UI (e.g., Vercel): prefer env override; fall back to public config.json backend.url
+  const cfg = await ConfigService.getInstance().loadConfig()
+  const envBase = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/+$/, '')
+  const backendBase = (cfg?.backend?.url || '').replace(/\/+$/, '')
+  const resolved = envBase ? `${envBase}/api` : (backendBase ? `${backendBase}/api` : '')
       if (resolved) {
         axiosInstance.defaults.baseURL = resolved
         config.baseURL = resolved

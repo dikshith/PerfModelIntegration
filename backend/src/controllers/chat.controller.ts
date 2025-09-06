@@ -14,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import * as path from 'path';
 import pdfParse from 'pdf-parse';
+import { pdfBufferToMarkdown } from '../utils/pdf-markdown';
 import {
   ApiTags,
   ApiOperation,
@@ -84,6 +85,7 @@ export class ChatController {
     }
 
     // Persist the file to disk so knowledge can be reloaded on restart
+    let savedBase = '';
     try {
       const uploadsDir = path.resolve(process.cwd(), 'uploads');
       if (!fs.existsSync(uploadsDir)) {
@@ -92,19 +94,26 @@ export class ChatController {
       const safeName = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.originalname}`;
       const filePath = path.join(uploadsDir, safeName);
       fs.writeFileSync(filePath, file.buffer);
+      savedBase = path.join(uploadsDir, path.parse(safeName).name);
     } catch (e) {
       console.warn('Failed to persist uploaded file to disk:', e);
     }
 
     // Extract text
     let content = '';
+    let type = file.mimetype;
     const ext = path.extname(file.originalname).toLowerCase();
     try {
       if (ext === '.pdf') {
-        const parsed = await pdfParse(file.buffer);
-        content = parsed.text || '';
+        // Convert PDF to Markdown and write sidecar .md for fast reloads
+        content = await pdfBufferToMarkdown(file.buffer, file.originalname);
+        type = 'text/markdown';
+        if (savedBase) {
+          try { fs.writeFileSync(`${savedBase}.md`, content, 'utf-8'); } catch {}
+        }
       } else {
         content = file.buffer.toString('utf-8');
+        if (ext === '.md') type = 'text/markdown';
       }
     } catch (e) {
       console.warn('Failed to parse uploaded file content, falling back to raw text:', e);
@@ -114,9 +123,9 @@ export class ChatController {
     const knowledgeItem = {
       id: `kb-${Date.now()}`,
       name: file.originalname,
-      content: content,
-      size: file.size,
-      type: file.mimetype,
+  content: content,
+  size: file.size,
+  type,
       uploadedAt: new Date()
     };
 

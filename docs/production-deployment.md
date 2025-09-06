@@ -17,6 +17,9 @@ This guide documents the production topology and the constraints we adhere to.
   - OLLAMA_BASE_URL=https://<subdomain>.pagekite.me (if using Ollama)
   - ALLOW_RAG_IN_PROD=true|false (default false)
   - Optional: CORS_ORIGIN / FRONTEND_URL for extra domains
+  - Recommended for your setup:
+    - FRONTEND_URL=https://dixit-llmproject.vercel.app
+    - CORS_ORIGINS=https://dixit-llmproject.vercel.app
 - Vercel:
   - NEXT_PUBLIC_API_BASE=https://<backend-domain> (no trailing /api). Optional if you serve frontend/public/config.json with backend.url set; the env var takes precedence.
 

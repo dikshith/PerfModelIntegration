@@ -312,13 +312,16 @@ export { Button, buttonVariants }
 ```typescript
 // lib/api/client.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import ConfigService from '@/lib/services/config.service';
 
 class APIClient {
   private instance: AxiosInstance;
 
   constructor() {
+    // Resolve base at runtime via env or public/config.json; append /api
     const base = (process.env.NEXT_PUBLIC_API_BASE || '').replace(/\/$/, '');
     const baseURL = base ? `${base}/api` : '/api';
+
     this.instance = axios.create({
       baseURL,
       timeout: 30000,
@@ -1205,7 +1208,7 @@ const handleMessageClick = useCallback((messageId: string) => {
 - Validation and toasts guide users when models are missing/unavailable.
 
 ## 🚀 Deployment notes
-- Set NEXT_PUBLIC_API_BASE to the backend origin (no trailing /api) or configure public/config.json. The env var takes precedence.
+- Prefer runtime discovery: set NEXT_PUBLIC_API_BASE to the backend origin (no trailing /api), or serve frontend/public/config.json with backend.url. The env var takes precedence.
 - When using Ollama in production, ensure the backend is configured with OLLAMA_BASE_URL to a public tunnel; the frontend never connects to Ollama directly.
 
 This comprehensive frontend architecture provides a robust, scalable, and highly performant user interface that leverages modern React patterns and Next.js optimization features.
